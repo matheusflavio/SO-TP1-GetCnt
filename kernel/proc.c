@@ -15,6 +15,8 @@ struct proc *initproc;
 int nextpid = 1;
 struct spinlock pid_lock;
 
+int sys_cnt[22] = {0};
+
 extern void forkret(void);
 static void freeproc(struct proc *p);
 

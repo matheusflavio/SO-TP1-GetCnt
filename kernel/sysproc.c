@@ -6,10 +6,15 @@
 #include "spinlock.h"
 #include "proc.h"
 
+extern int sys_cnt[22];
+
 uint64
 sys_exit(void)
 {
   int n;
+
+  sys_cnt[1]++;
+
   argint(0, &n);
   exit(n);
   return 0;  // not reached
@@ -18,12 +23,14 @@ sys_exit(void)
 uint64
 sys_getpid(void)
 {
+  sys_cnt[10]++;
   return myproc()->pid;
 }
 
 uint64
 sys_fork(void)
 {
+  sys_cnt[0]++;
   return fork();
 }
 
@@ -31,6 +38,9 @@ uint64
 sys_wait(void)
 {
   uint64 p;
+
+  sys_cnt[2]++;
+
   argaddr(0, &p);
   return wait(p);
 }
@@ -40,6 +50,8 @@ sys_sbrk(void)
 {
   uint64 addr;
   int n;
+
+  sys_cnt[11]++;
 
   argint(0, &n);
   addr = myproc()->sz;
@@ -53,6 +65,8 @@ sys_sleep(void)
 {
   int n;
   uint ticks0;
+
+  sys_cnt[12]++;
 
   argint(0, &n);
   acquire(&tickslock);
@@ -73,6 +87,8 @@ sys_kill(void)
 {
   int pid;
 
+  sys_cnt[5]++;
+
   argint(0, &pid);
   return kill(pid);
 }
@@ -83,6 +99,8 @@ uint64
 sys_uptime(void)
 {
   uint xticks;
+  
+  sys_cnt[13]++;
 
   acquire(&tickslock);
   xticks = ticks;
