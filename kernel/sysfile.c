@@ -15,6 +15,7 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
+#include "syscall.h"
 
 extern int sys_cnt[22];
 
@@ -59,7 +60,7 @@ sys_dup(void)
   struct file *f;
   int fd;
 
-  sys_cnt[9]++;
+  sys_cnt[SYS_dup - 1]++;
 
   if(argfd(0, 0, &f) < 0)
     return -1;
@@ -76,7 +77,7 @@ sys_read(void)
   int n;
   uint64 p;
 
-  sys_cnt[4]++;
+  sys_cnt[SYS_read - 1]++;
 
   argaddr(1, &p);
   argint(2, &n);
@@ -92,7 +93,7 @@ sys_write(void)
   int n;
   uint64 p;
 
-  sys_cnt[15]++;
+  sys_cnt[SYS_write - 1]++;
   
   argaddr(1, &p);
   argint(2, &n);
@@ -108,7 +109,7 @@ sys_close(void)
   int fd;
   struct file *f;
 
-  sys_cnt[20]++;
+  sys_cnt[SYS_close - 1]++;
 
   if(argfd(0, &fd, &f) < 0)
     return -1;
@@ -123,7 +124,7 @@ sys_fstat(void)
   struct file *f;
   uint64 st; // user pointer to struct stat
 
-  sys_cnt[7]++;
+  sys_cnt[SYS_fstat - 1]++;
 
   argaddr(1, &st);
   if(argfd(0, 0, &f) < 0)
@@ -138,7 +139,7 @@ sys_link(void)
   char name[DIRSIZ], new[MAXPATH], old[MAXPATH];
   struct inode *dp, *ip;
 
-  sys_cnt[18]++;
+  sys_cnt[SYS_link - 1]++;
 
   if(argstr(0, old, MAXPATH) < 0 || argstr(1, new, MAXPATH) < 0)
     return -1;
@@ -207,7 +208,7 @@ sys_unlink(void)
   char name[DIRSIZ], path[MAXPATH];
   uint off;
 
-  sys_cnt[17]++;
+  sys_cnt[SYS_unlink - 1]++;
 
   if(argstr(0, path, MAXPATH) < 0)
     return -1;
@@ -326,7 +327,7 @@ sys_open(void)
   struct inode *ip;
   int n;
 
-  sys_cnt[14]++;
+  sys_cnt[SYS_open - 1]++;
 
   argint(1, &omode);
   if((n = argstr(0, path, MAXPATH)) < 0)
@@ -394,7 +395,7 @@ sys_mkdir(void)
   char path[MAXPATH];
   struct inode *ip;
 
-  sys_cnt[19]++;
+  sys_cnt[SYS_mkdir - 1]++;
 
   begin_op();
   if(argstr(0, path, MAXPATH) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0){
@@ -413,7 +414,7 @@ sys_mknod(void)
   char path[MAXPATH];
   int major, minor;
 
-  sys_cnt[16]++;
+  sys_cnt[SYS_mknod - 1]++;
 
   begin_op();
   argint(1, &major);
@@ -435,7 +436,7 @@ sys_chdir(void)
   struct inode *ip;
   struct proc *p = myproc();
   
-  sys_cnt[8]++;
+  sys_cnt[SYS_chdir - 1]++;
 
   begin_op();
   if(argstr(0, path, MAXPATH) < 0 || (ip = namei(path)) == 0){
@@ -462,7 +463,7 @@ sys_exec(void)
   int i;
   uint64 uargv, uarg;
 
-  sys_cnt[6]++;
+  sys_cnt[SYS_exec - 1]++;
 
   argaddr(1, &uargv);
   if(argstr(0, path, MAXPATH) < 0) {
@@ -508,7 +509,7 @@ sys_pipe(void)
   int fd0, fd1;
   struct proc *p = myproc();
 
-  sys_cnt[3]++;
+  sys_cnt[SYS_pipe - 1]++;
 
   argaddr(0, &fdarray);
   if(pipealloc(&rf, &wf) < 0)
@@ -535,11 +536,10 @@ sys_pipe(void)
 uint64
 sys_getcnt(void)
 {
-  sys_cnt[21]++;
+  sys_cnt[SYS_getcnt - 1]++;
 
   int sys_ID;
   argint(0, &sys_ID); //argfd mostra como pegar um argumento int
-  sys_ID--;
 
-  return sys_cnt[sys_ID];
+  return sys_cnt[sys_ID - 1];
 }
